@@ -116,8 +116,8 @@ const server = createServer(async (request, response) => {
   }
 });
 
-server.listen(port, () => {
-  process.stdout.write(`Pilot Go/No-Go server listening on http://localhost:${port}\n`);
+server.listen(port, '0.0.0.0', () => {
+  process.stdout.write(`Pilot Go/No-Go server listening on http://0.0.0.0:${port}\n`);
 });
 
 async function serveStaticAsset(pathname, response) {
