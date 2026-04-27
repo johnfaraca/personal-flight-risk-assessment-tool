@@ -1,119 +1,128 @@
-# Pilot Go/No-Go MVP
+# Personal Flight Risk Assessment Tool
 
-Presentation-ready MVP web app for a pilot go/no-go decision-support prototype focused on general aviation preflight risk assessment.
+An educational MVP and decision-support prototype for structured preflight risk review. The app helps a pilot organize risk factors before a flight by walking through flight setup, weather context, PAVE factors, deterministic scoring, advisories, and optional AI-supported discussion.
 
-## What it does
+“This project uses deterministic scoring first and AI-supported discussion second. The AI chat is supplemental and does not calculate, override, or authorize the final recommendation.”
 
-- Guides the user through four screens: Flight Setup, Weather Picture, PAVE Assessment, and Results
-- Uses a local weather service layer that can return FAA AWC-backed weather and fall back to generated context when needed
-- Implements a deterministic scoring engine using the frozen VFR/IFR logic provided
-- Runs VFR scoring first, then offers an IFR reassessment gate only when the VFR result is not `GO`
-- Keeps External Pressures visible but advisory-only in v1
-- Includes a mock AI explanation panel that never calculates scores or overrides the deterministic result
+Deterministic scoring first; AI discussion second.
 
-## Important safety note
+## Problem Addressed
 
-This prototype is decision-support only. It is not a replacement for:
+Pilots need structured support for organizing preflight risk factors before making operational decisions. This prototype focuses on pilot condition, aircraft status, weather and environmental context, route complexity, and external pressures so those considerations can be reviewed consistently instead of informally.
 
-- official weather briefings
-- flight planning
-- aircraft performance calculations
-- regulations
-- pilot judgment
+Decision-support only — not a substitute for official briefings, flight planning, performance calculations, regulations, or pilot judgment.
 
-## Stack
+## How It Works
+
+1. Landing page: introduces the assessment flow and provides access to the general safety chat.
+2. Flight setup: collects route, timing, altitude, and cruise speed inputs.
+3. Weather Picture: requests and summarizes weather, airport, route, and advisory context.
+4. PAVE Assessment: presents structured risk questions and pre-filled weather or airport factors where available.
+5. Results: displays the deterministic recommendation, score details, risk drivers, and mitigation prompts.
+6. Advisories and Notices: shows applicable FAA weather advisory and NOTAM-related context, including advisory-only items.
+7. Discuss This Result with AI: opens an IBM watsonx Orchestrate chat with assessment context for supplemental discussion.
+8. General Safety Chat: provides a separate general aviation safety discussion mode without requiring a completed result.
+
+## What Is PAVE?
+
+PAVE is an aviation risk-management framework:
+
+- Pilot
+- Aircraft
+- enVironment
+- External pressures
+
+The app uses PAVE to structure the assessment flow and help users review human, aircraft, environmental, and pressure-related factors before interpreting the final result.
+
+## Responsible AI Design
+
+The recommendation is produced by deterministic scoring logic. AI is supplemental and is used only to help discuss completed results, risk drivers, and mitigation ideas.
+
+AI does not calculate scores, override deterministic outcomes, authorize flight decisions, or make go/no-go decisions. The app also separates general safety chat from result-specific AI discussion so broad aviation questions and assessment-context discussion remain distinct experiences.
+
+## Weather and Advisory Note
+
+The app uses FAA Aviation Weather Center data where available, including server-side requests for aviation weather products. Some advisories may be shown as advisory-only when they do not cleanly map to scored risk factors. NOTAM parsing may be unavailable depending on the data returned by FAA NOTAM Search.
+
+Users must verify official weather, NOTAMs, and flight conditions separately through approved aviation sources before making operational decisions.
+
+## Privacy Note
+
+This prototype does not include user accounts, payment processing, or intentional collection or storage of personally identifiable information. Browser session storage may temporarily hold current assessment data so the result-specific AI discussion can receive the active assessment context during the session.
+
+Embedded AI chat may process user messages and assessment context through IBM watsonx Orchestrate. Users should not enter sensitive personal, credential, medical, or private aircraft ownership information.
+
+## Tech Stack
 
 - React
 - Vite
 - React Router
-- React state with a small local Node service layer for weather requests
+- React Icons
+- Node.js HTTP server for local app serving and API routes
+- Server API routes for airport lookup, weather picture generation, and AI explanation availability
+- FAA Aviation Weather Center data integration for METAR, TAF, station, airport, G-AIRMET, and SIGMET/AIRMET data
+- FAA NOTAM Search integration with best-effort parsing
+- IBM watsonx Orchestrate embedded chat
+- Browser session storage for temporary assessment discussion context
 
-## Getting started
+## Setup and Run
 
-1. Install a current Node.js release if it is not already available.
-2. Install dependencies:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-3. Start the development server and local weather service:
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-4. Build for production:
+Build for production:
 
 ```bash
 npm run build
 ```
 
-## App flow
+Preview the production build through the Node server:
 
-1. `Flight Setup`
-2. `Weather Picture`
-3. `PAVE Assessment`
-4. `Results`
-
-## Project structure
-
-```text
-src/
-  components/       Shared UI pieces
-  data/             Frozen scoring tables
-  engine/           Assessment metadata + deterministic scoring engine
-  screens/          Four user-facing screens
-  services/         Mock weather + AI explanation integration points
-  state/            Shared app state
-  utils/            Flight estimation helpers
+```bash
+npm run preview
 ```
 
-## MVP behavior notes
+The local server defaults to `http://localhost:5173` unless `PORT` is set.
 
-- Route distance is estimated using airport coordinate heuristics
-- Cruise time is estimated from route distance and cruise speed
-- A fixed 30-minute operational buffer is added automatically
-- ETA is displayed on Flight Setup and reused in Weather Picture
-- Mock weather pre-selects a subset of environmental checklist items to make the demo believable
+## Screenshots
 
-## Integration hooks
+### Landing page
 
-### Weather API
+Screenshot placeholder.
 
-The frontend weather layer currently uses `src/services/weatherService.js`, which calls the local server-side weather service.
+### Weather Picture
 
-To swap in live data later:
+Screenshot placeholder.
 
-- keep the returned weather-picture object shape stable so the screens and scoring engine do not need to change
-- update the FAA AWC adapter in `server/awcClient.js` and `server/weatherService.js`
-- map additional live weather outputs into the hazard summaries and any auto-selected assessment factors
+### PAVE Assessment
 
-### AI explanation
+Screenshot placeholder.
 
-The AI panel currently uses `src/services/aiExplanationService.js`.
+### Results
 
-To add a live AI explanation later:
+Screenshot placeholder.
 
-- pass only the deterministic assessment result object into the model prompt
-- keep scoring logic entirely outside the model
-- treat the model output as optional explanatory text only
-- never allow the model to override score, rule path, or final recommendation
+### AI discussion
 
-## Deterministic scoring implementation
+Screenshot placeholder.
 
-- Frozen factor tables live in `src/data/factors.js`
-- Assessment question metadata is generated in `src/engine/factors.js`
-- Scoring logic lives in `src/engine/scoringEngine.js`
+## Future Improvements
 
-The scoring engine:
+- Server-side persisted assessment context
+- OpenAPI tool for assessment context retrieval
+- Improved NOTAM parsing
+- Expanded aircraft and performance checks
+- More robust deployment monitoring
 
-- evaluates VFR first
-- stops immediately if VFR returns `GO`
-- otherwise supports the exact IFR reassessment gate requested
-- excludes `null` weights for rule-specific non-applicable factors
-- ignores External Pressures for score totals
+## License
 
-## Notes about this environment
-
-The current workspace did not have `node`, `npm`, `pnpm`, `yarn`, or `bun` available, so the app was scaffolded but not executed locally here. Once Node.js is available, `npm install` and `npm run dev` should be the next steps.
+This project is licensed under the MIT License. See the LICENSE file for details.
