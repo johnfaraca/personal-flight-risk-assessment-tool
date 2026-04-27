@@ -5,12 +5,6 @@ function LandingScreen() {
 
   return (
     <div className="screen-grid">
-      <div className="card landing-intro-note">
-        <p>
-          AI-supported preflight risk review with structured decision support.
-        </p>
-      </div>
-
       <div className="card landing-start-card">
         <div className="landing-start-header">
           <h2>Choose Your Starting Point</h2>

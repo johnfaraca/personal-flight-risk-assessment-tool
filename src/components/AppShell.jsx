@@ -50,11 +50,16 @@ function AppShell() {
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
       <header className="hero">
-        <div className="header-brand">
-          <img src={teamEagleAiLogo} alt="Team Eagle_AI logo" />
-          <div>
-            <h1 className="app-title">Personal Flight Risk Assessment Tool</h1>
-            <p className="brand-label">Team Eagle_AI</p>
+        <div className="card hero-card">
+          <div className="header-brand">
+            <img src={teamEagleAiLogo} alt="Team Eagle_AI logo" />
+            <div className="header-brand-copy">
+              <h1 className="app-title">Personal Flight Risk Assessment Tool</h1>
+              <p className="brand-label">Team Eagle_AI</p>
+              <p className="hero-support-line">
+                Pilot go/no-go decision support for preflight review.
+              </p>
+            </div>
           </div>
         </div>
         {showAssessmentNav ? (

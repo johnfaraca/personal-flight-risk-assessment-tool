@@ -83,18 +83,26 @@ button {
   border-bottom: 1px solid var(--border);
 }
 
+.hero-card {
+  padding: 20px 24px;
+}
+
 .header-brand {
   display: flex;
-  gap: 12px;
+  gap: 18px;
   align-items: center;
 }
 
 .header-brand img {
   width: auto;
-  height: 60px;
-  max-width: 210px;
+  height: 72px;
+  max-width: 230px;
   object-fit: contain;
   flex: 0 0 auto;
+}
+
+.header-brand-copy {
+  min-width: 0;
 }
 
 .app-title {
@@ -107,6 +115,13 @@ button {
   margin-bottom: 0;
   color: var(--text-muted);
   font-weight: 800;
+}
+
+.hero-support-line {
+  max-width: 680px;
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.96rem;
 }
 
 .eyebrow {
@@ -509,16 +524,6 @@ h1 {
   gap: 18px;
 }
 
-.landing-intro-note {
-  padding: 14px 18px;
-}
-
-.landing-intro-note p {
-  max-width: 820px;
-  margin-bottom: 0;
-  color: var(--text-muted);
-}
-
 .pave-note {
   margin-bottom: 0;
   color: var(--text-muted);
@@ -865,6 +870,20 @@ h1 {
 @media (max-width: 720px) {
   .app-shell {
     padding: 18px 14px 28px;
+  }
+
+  .hero-card {
+    padding: 18px;
+  }
+
+  .header-brand {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-brand img {
+    height: 58px;
+    max-width: 190px;
   }
 
   .two-column-grid,
