@@ -116,6 +116,16 @@ const server = createServer(async (request, response) => {
   }
 });
 
+process.stdout.write(
+  `Starting Pilot Go/No-Go server with NODE_ENV=${process.env.NODE_ENV ?? 'unset'} PORT=${
+    process.env.PORT ?? 'unset'
+  }\n`
+);
+
+server.on('error', (error) => {
+  process.stderr.write(`Pilot Go/No-Go server failed to start: ${error.stack || error.message}\n`);
+});
+
 server.listen(port, '0.0.0.0', () => {
   process.stdout.write(`Pilot Go/No-Go server listening on http://0.0.0.0:${port}\n`);
 });
