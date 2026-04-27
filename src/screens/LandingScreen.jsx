@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import SectionCard from '../components/SectionCard';
 
 function LandingScreen() {
   const navigate = useNavigate();
@@ -12,10 +11,14 @@ function LandingScreen() {
         </p>
       </div>
 
-      <SectionCard
-        title="Choose Your Starting Point"
-        subtitle="Start a structured preflight review using PAVE or ask a general safety question."
-      >
+      <div className="card landing-start-card">
+        <div className="landing-start-header">
+          <h2>Choose Your Starting Point</h2>
+          <p>
+            Start a structured preflight review using <strong>PAVE</strong> or ask a general safety question.
+          </p>
+        </div>
+
         <div className="landing-option-grid">
           <button
             className="entry-card"
@@ -49,7 +52,7 @@ function LandingScreen() {
             <strong>PAVE</strong>: <strong>P</strong>ilot, <strong>A</strong>ircraft, en<strong>V</strong>ironment, and <strong>E</strong>xternal pressures.
           </p>
         </div>
-      </SectionCard>
+      </div>
     </div>
   );
 }
