@@ -16,10 +16,21 @@ export function createWeatherPicture({
   const basePicture = buildGeneratedWeatherPicture(flightSetup, flightPlan);
 
   if (!awcData) {
+    const advisoryDebug = buildAdvisoryDebug({
+      apiStatus,
+      dataMode: apiStatus === 'demo' ? 'mock' : 'fallback',
+      fetchedSuccessfully: false,
+      sourceUsed: 'Generated fallback weather',
+      fetchErrorMessage: null,
+      rawCounts: null,
+      mappedCount: basePicture.advisories?.items?.length ?? 0
+    });
+
     return finalizeWeatherPicture(basePicture, {
       apiStatus,
       apiNote,
-      sourceFingerprint: apiStatus
+      sourceFingerprint: apiStatus,
+      advisoryDebug
     });
   }
 
@@ -94,17 +105,21 @@ export function createWeatherPicture({
     {
       apiStatus,
       apiNote,
-      sourceFingerprint: buildSourceFingerprint(awcData)
+      sourceFingerprint: buildSourceFingerprint(awcData),
+      advisoryDebug: advisoryAnalysis.debug
     }
   );
 }
 
-function finalizeWeatherPicture(basePicture, { apiStatus, apiNote, sourceFingerprint }) {
+function finalizeWeatherPicture(basePicture, { apiStatus, apiNote, sourceFingerprint, advisoryDebug }) {
   return {
     assessmentMetadata: basePicture.assessmentMetadata,
     departure: basePicture.departure,
     destination: basePicture.destination,
-    advisories: basePicture.advisories,
+    advisories: {
+      ...basePicture.advisories,
+      debug: advisoryDebug ?? basePicture.advisories?.debug ?? null
+    },
     departureSummary: basePicture.departureSummary,
     destinationSummary: basePicture.destinationSummary,
     weatherDataUsed: basePicture.weatherDataUsed ?? buildUnavailableWeatherDataUsed(),
@@ -138,7 +153,15 @@ export function createUnavailableWeatherPicture({
     assessmentMetadata: emptyMetadata,
     departure,
     destination,
-    advisories: buildUnavailableAdvisories(),
+    advisories: buildUnavailableAdvisories(undefined, {
+      apiStatus,
+      dataMode: 'unavailable',
+      fetchedSuccessfully: false,
+      sourceUsed: 'No live advisory source',
+      fetchErrorMessage: apiNote,
+      rawCounts: null,
+      mappedCount: 0
+    }),
     departureSummary: 'Live departure weather unavailable.',
     destinationSummary: 'Live destination weather unavailable.',
     weatherDataUsed: buildUnavailableWeatherDataUsed(),
@@ -293,7 +316,10 @@ function buildUnavailableHazards() {
   };
 }
 
-function buildUnavailableAdvisories(note = 'Live advisories are unavailable for this weather picture.') {
+function buildUnavailableAdvisories(
+  note = 'Live advisories are unavailable for this weather picture.',
+  debug = null
+) {
   return {
     sources: {
       gairmet: 'unavailable',
@@ -302,7 +328,44 @@ function buildUnavailableAdvisories(note = 'Live advisories are unavailable for 
     },
     note,
     officialWeatherGuidance: OFFICIAL_WEATHER_GUIDANCE,
+    debug:
+      debug ??
+      buildAdvisoryDebug({
+        apiStatus: 'unavailable',
+        dataMode: 'unavailable',
+        fetchedSuccessfully: false,
+        sourceUsed: 'No live advisory source',
+        fetchErrorMessage: note,
+        rawCounts: null,
+        mappedCount: 0
+      }),
     items: []
+  };
+}
+
+function buildAdvisoryDebug({
+  apiStatus,
+  dataMode,
+  fetchedSuccessfully,
+  sourceUsed,
+  fetchErrorMessage,
+  rawCounts,
+  mappedCount
+}) {
+  return {
+    apiStatus,
+    dataMode,
+    fetchedSuccessfully,
+    sourceUsed,
+    fetchErrorMessage: fetchErrorMessage ?? null,
+    rawAdvisoryCount: rawCounts?.total ?? 0,
+    rawCounts: rawCounts ?? {
+      gairmet: 0,
+      airsigmet: 0,
+      notams: 0,
+      total: 0
+    },
+    mappedRouteRelevantCount: mappedCount ?? 0
   };
 }
 
@@ -753,10 +816,28 @@ function buildLiveAdvisoryAnalysis({ awcData, flightSetup, flightPlan }) {
   });
   const hasAdvisoryOnlyWeather = advisoryItems.some((item) => item.impact === 'advisory-only');
   const hasUnavailableNoticeData = awcData.advisories?.notams?.status === 'unavailable';
+  const rawCounts = {
+    gairmet: awcData.advisories?.gairmet?.length ?? 0,
+    airsigmet: awcData.advisories?.airsigmet?.length ?? 0,
+    notams: awcData.advisories?.notams?.items?.length ?? 0,
+    total:
+      (awcData.advisories?.gairmet?.length ?? 0) +
+      (awcData.advisories?.airsigmet?.length ?? 0) +
+      (awcData.advisories?.notams?.items?.length ?? 0)
+  };
 
   return {
     scoreableFactorIds: [...scoreableFactorIds],
     suppressedFactorIds: [...suppressedFactorIds],
+    debug: buildAdvisoryDebug({
+      apiStatus: 'live',
+      dataMode: 'live',
+      fetchedSuccessfully: true,
+      sourceUsed: 'FAA AWC API via app weather proxy',
+      fetchErrorMessage: awcData.advisories?.notams?.details?.cause ?? null,
+      rawCounts,
+      mappedCount: advisoryItems.length
+    }),
     display: {
       sources: {
         gairmet: 'live',

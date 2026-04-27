@@ -12,6 +12,16 @@ export async function fetchWeatherPicture(flightSetup) {
     typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
   const proxyOrigin = (configuredProxyOrigin || browserOrigin).trim();
   const endpoint = new URL('/api/weather-picture', proxyOrigin);
+  const clientDebug = {
+    viteWeatherProxyOrigin: configuredProxyOrigin || '(not set; using current origin)',
+    browserOrigin,
+    selectedProxyOrigin: endpoint.origin,
+    requestUrl: endpoint.toString(),
+    viteMode:
+      typeof import.meta !== 'undefined' && import.meta.env
+        ? import.meta.env.MODE
+        : 'unknown'
+  };
   const params = new URLSearchParams({
     departureAirport: flightSetup.departureAirport,
     destinationAirport: flightSetup.destinationAirport,
@@ -34,7 +44,11 @@ export async function fetchWeatherPicture(flightSetup) {
     console.error('[weather] proxy request failed before response', error);
     throw createWeatherClientError(
       'proxy_not_running',
-      `Local weather proxy did not respond at ${endpoint.origin}. Start the local proxy with npm run dev.`
+      `Weather proxy did not respond at ${endpoint.origin}. Verify the deployed app has a reachable /api/weather-picture endpoint or VITE_WEATHER_PROXY_ORIGIN is configured correctly.`,
+      {
+        ...clientDebug,
+        cause: error.message
+      }
     );
   }
 
@@ -54,14 +68,16 @@ export async function fetchWeatherPicture(flightSetup) {
       endpoint,
       response,
       errorPayload,
-      errorText
+      errorText,
+      clientDebug
     });
   }
 
   if (!contentType.includes('application/json')) {
     throw createWeatherClientError(
       'wrong_frontend_url',
-      `Frontend is not receiving JSON from ${endpoint.toString()}. Check that the app is running through the local proxy on port 5173.`
+      `Frontend is not receiving JSON from ${endpoint.toString()}. Check that the deployed app is routing /api/weather-picture to the weather proxy.`,
+      clientDebug
     );
   }
 
@@ -70,7 +86,8 @@ export async function fetchWeatherPicture(flightSetup) {
   if (!payload?.apiHook || !payload?.departure || !payload?.destination) {
     throw createWeatherClientError(
       'faa_mapping_issue',
-      'Local proxy returned an incomplete FAA weather payload. Check the FAA mapping layer.'
+      'Weather proxy returned an incomplete FAA weather payload. Check the FAA mapping layer.',
+      clientDebug
     );
   }
 
@@ -80,7 +97,20 @@ export async function fetchWeatherPicture(flightSetup) {
     weatherStatus: payload.apiHook.status
   });
 
-  return payload;
+  return attachClientWeatherDebug(payload, clientDebug);
+}
+
+function attachClientWeatherDebug(payload, clientDebug) {
+  return {
+    ...payload,
+    advisories: {
+      ...(payload.advisories ?? {}),
+      debug: {
+        ...(payload.advisories?.debug ?? {}),
+        client: clientDebug
+      }
+    }
+  };
 }
 
 export function getDemoWeatherPicture(flightSetup, flightPlan, apiNote) {
@@ -105,11 +135,12 @@ export function getUnavailableWeatherPicture(flightSetup, flightPlan, apiNote) {
   });
 }
 
-function classifyProxyError({ endpoint, response, errorPayload, errorText }) {
+function classifyProxyError({ endpoint, response, errorPayload, errorText, clientDebug }) {
   if (response.status === 404) {
     return createWeatherClientError(
       'wrong_frontend_url',
-      `Frontend requested ${endpoint.toString()} but received 404. Verify the frontend is calling the local proxy on port 5173.`
+      `Frontend requested ${endpoint.toString()} but received 404. Verify the deployed app has /api/weather-picture or VITE_WEATHER_PROXY_ORIGIN points to the weather proxy.`,
+      clientDebug
     );
   }
 
@@ -117,14 +148,14 @@ function classifyProxyError({ endpoint, response, errorPayload, errorText }) {
     return createWeatherClientError(
       'faa_mapping_issue',
       errorPayload.message || 'FAA weather mapping failed in the local proxy.',
-      errorPayload
+      { ...(errorPayload ?? {}), client: clientDebug }
     );
   }
 
   return createWeatherClientError(
     'bad_proxy_response',
     errorPayload?.message || errorText || `Local weather proxy returned HTTP ${response.status}.`,
-    errorPayload || { status: response.status }
+    { ...(errorPayload || { status: response.status }), client: clientDebug }
   );
 }
 

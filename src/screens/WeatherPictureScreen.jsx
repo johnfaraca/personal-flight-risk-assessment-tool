@@ -32,6 +32,12 @@ function WeatherPictureScreen() {
   const showEnrouteWorkload = Boolean(displayedHazards.interpretation);
   const advisoryItems = weatherPicture.advisories?.items ?? [];
   const hasRouteRelevantAdvisoryItems = advisoryItems.length > 0;
+  const advisoryDebug = buildAdvisoryDebugSummary({
+    weatherPicture,
+    weatherStatus,
+    weatherError,
+    advisoryItems
+  });
 
   return (
     <div className="screen-grid">
@@ -178,10 +184,94 @@ function WeatherPictureScreen() {
         ) : (
           <p>No route-relevant advisories or notices are currently mapped for this flight.</p>
         )}
+        <AdvisoryDebugPanel debug={advisoryDebug} />
         <div className="official-weather-guidance">{OFFICIAL_WEATHER_GUIDANCE}</div>
       </SectionCard>
     </div>
   );
+}
+
+function AdvisoryDebugPanel({ debug }) {
+  return (
+    <div className="debug-panel">
+      <span className="eyebrow">Temporary advisory debug</span>
+      <dl className="debug-grid">
+        <div>
+          <dt>Fetch status</dt>
+          <dd>{debug.fetchedSuccessfully ? 'Fetched successfully' : 'Not fetched / unavailable'}</dd>
+        </div>
+        <div>
+          <dt>Data mode</dt>
+          <dd>{debug.dataMode}</dd>
+        </div>
+        <div>
+          <dt>Source used</dt>
+          <dd>{debug.sourceUsed}</dd>
+        </div>
+        <div>
+          <dt>Raw advisories returned</dt>
+          <dd>{debug.rawAdvisoryCount}</dd>
+        </div>
+        <div>
+          <dt>Mapped route-relevant advisories</dt>
+          <dd>{debug.mappedRouteRelevantCount}</dd>
+        </div>
+        <div>
+          <dt>Fetch/API error</dt>
+          <dd>{debug.fetchErrorMessage || 'None reported'}</dd>
+        </div>
+        <div>
+          <dt>AWC / NOTAM sources</dt>
+          <dd>
+            G-AIRMET {debug.rawCounts.gairmet}, SIGMET/AIRMET {debug.rawCounts.airsigmet},
+            NOTAM {debug.rawCounts.notams}
+          </dd>
+        </div>
+        <div>
+          <dt>Proxy configuration</dt>
+          <dd>{debug.proxyConfiguration}</dd>
+        </div>
+      </dl>
+      <p>
+        Production check: the browser requests <code>/api/weather-picture</code> on the current
+        origin unless <code>VITE_WEATHER_PROXY_ORIGIN</code> is set. The FAA AWC and NOTAM base
+        URLs are server-side constants, not Vite variables. A missing deployed API route, missing
+        proxy origin, or CORS/network failure can prevent live advisories from loading.
+      </p>
+    </div>
+  );
+}
+
+function buildAdvisoryDebugSummary({ weatherPicture, weatherStatus, weatherError, advisoryItems }) {
+  const debug = weatherPicture.advisories?.debug ?? {};
+  const clientDebug = debug.client ?? weatherError?.details?.client ?? weatherError?.details ?? {};
+  const rawCounts = debug.rawCounts ?? {
+    gairmet: 0,
+    airsigmet: 0,
+    notams: 0,
+    total: 0
+  };
+  const viteProxyOrigin =
+    typeof import.meta !== 'undefined' && import.meta.env
+      ? import.meta.env.VITE_WEATHER_PROXY_ORIGIN || ''
+      : '';
+  const browserOrigin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
+  const selectedProxyOrigin = clientDebug.selectedProxyOrigin ?? (viteProxyOrigin || browserOrigin);
+
+  return {
+    fetchedSuccessfully:
+      debug.fetchedSuccessfully ?? (weatherPicture.apiHook?.status === 'live' && !weatherError),
+    dataMode: debug.dataMode ?? weatherPicture.apiHook?.status ?? weatherStatus ?? 'unknown',
+    sourceUsed: debug.sourceUsed ?? weatherPicture.weatherDataUsed?.sourceLabel ?? 'Unknown',
+    fetchErrorMessage:
+      debug.fetchErrorMessage ?? weatherError?.message ?? weatherError?.details?.message ?? '',
+    rawAdvisoryCount: debug.rawAdvisoryCount ?? rawCounts.total ?? 0,
+    rawCounts,
+    mappedRouteRelevantCount: debug.mappedRouteRelevantCount ?? advisoryItems.length,
+    proxyConfiguration: `VITE_WEATHER_PROXY_ORIGIN ${
+      viteProxyOrigin || 'not set'
+    }; browser origin ${browserOrigin}; selected proxy origin ${selectedProxyOrigin}`
+  };
 }
 
 function StationSummary({ station, airportCode, airportName }) {

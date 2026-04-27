@@ -549,6 +549,42 @@ h1 {
   font-size: 0.94rem;
 }
 
+.debug-panel {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px dashed rgba(23, 119, 200, 0.34);
+  border-radius: 16px;
+  background: #f4f8fc;
+  color: #24384d;
+}
+
+.debug-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 12px;
+}
+
+.debug-grid div {
+  min-width: 0;
+}
+
+.debug-grid dt {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.debug-grid dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.debug-panel p {
+  margin-bottom: 0;
+}
+
 .advisory-altitude {
   color: #24384d;
   font-weight: 700;
@@ -948,6 +984,7 @@ h1 {
   .two-column-grid,
   .three-column-grid,
   .weather-grid,
+  .debug-grid,
   .landing-option-grid,
   .form-grid,
   .stat-grid,
@@ -1020,6 +1057,7 @@ h1 {
   .two-column-grid,
   .three-column-grid,
   .weather-grid,
+  .debug-grid,
   .landing-option-grid,
   .form-grid,
   .stat-grid,
