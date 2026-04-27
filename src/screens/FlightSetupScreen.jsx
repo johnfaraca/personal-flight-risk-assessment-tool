@@ -39,14 +39,21 @@ function FlightSetupScreen() {
         title="Flight Setup"
         subtitle="Enter trip details, review estimated timing, then continue to the weather picture."
         actions={
-          <>
-            <button className="secondary-button" type="button" onClick={useSampleFlight}>
+          <div className="flight-setup-actions">
+            <button
+              className="secondary-button flight-sample-action"
+              type="button"
+              onClick={useSampleFlight}
+            >
               Use sample flight
             </button>
-            <button className="primary-button" onClick={() => navigate('/weather-picture')}>
+            <button
+              className="primary-button flight-continue-action"
+              onClick={() => navigate('/weather-picture')}
+            >
               Continue to Weather Picture
             </button>
-          </>
+          </div>
         }
       >
         <div className="flight-setup-layout">

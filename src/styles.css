@@ -183,7 +183,22 @@ h1 {
   flex-wrap: wrap;
 }
 
+.wizard-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.wizard-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .wizard-title {
+  margin-bottom: 0;
   color: var(--accent-dark);
   font-weight: 900;
 }
@@ -267,6 +282,13 @@ h1 {
   flex-wrap: wrap;
   gap: 12px;
   justify-content: flex-end;
+}
+
+.assessment-header-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .results-summary-layout {
@@ -399,6 +421,21 @@ h1 {
   grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.9fr);
   gap: 20px;
   align-items: start;
+}
+
+.flight-setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.flight-continue-action {
+  order: 2;
+}
+
+.flight-sample-action {
+  order: 1;
 }
 
 .form-grid input {
@@ -867,6 +904,40 @@ h1 {
   }
 }
 
+@media (max-width: 900px) {
+  .section-header:has(.flight-setup-actions) {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .section-actions:has(.flight-setup-actions),
+  .flight-setup-actions {
+    width: 100%;
+  }
+
+  .flight-setup-actions {
+    display: grid;
+    gap: 10px;
+    justify-items: stretch;
+    justify-content: stretch;
+    max-width: 420px;
+  }
+
+  .flight-continue-action {
+    order: 1;
+  }
+
+  .flight-sample-action {
+    order: 2;
+  }
+
+  .flight-setup-actions .primary-button,
+  .flight-setup-actions .secondary-button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 18px 14px 28px;
@@ -923,5 +994,40 @@ h1 {
 
   .result-context-panel .score-banner {
     grid-template-columns: 1fr;
+  }
+
+  .flight-setup-actions {
+    display: grid;
+    gap: 10px;
+    justify-items: stretch;
+    width: 100%;
+  }
+
+  .flight-continue-action {
+    order: 1;
+  }
+
+  .flight-sample-action {
+    order: 2;
+  }
+
+  .flight-setup-actions .primary-button,
+  .flight-setup-actions .secondary-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .assessment-header-row,
+  .wizard-heading-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .wizard-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
   }
 }

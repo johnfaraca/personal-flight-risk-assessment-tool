@@ -64,21 +64,25 @@ function AppShell() {
         </div>
         {showAssessmentNav ? (
           <div className="wizard-nav" aria-label="Assessment session controls">
-            <span className="wizard-title">Full PAVE Assessment</span>
-            <button
-              className="secondary-button compact-button"
-              type="button"
-              onClick={() => requestAssessmentExit('/flight-setup')}
-            >
-              Reset Assessment
-            </button>
-            <button
-              className="secondary-button compact-button"
-              type="button"
-              onClick={() => requestAssessmentExit('/')}
-            >
-              Exit Assessment
-            </button>
+            <div className="wizard-heading-row">
+              <h2 className="wizard-title">Full PAVE Assessment</h2>
+              <div className="wizard-actions">
+                <button
+                  className="secondary-button compact-button"
+                  type="button"
+                  onClick={() => requestAssessmentExit('/flight-setup')}
+                >
+                  Reset Assessment
+                </button>
+                <button
+                  className="secondary-button compact-button"
+                  type="button"
+                  onClick={() => requestAssessmentExit('/')}
+                >
+                  Exit Assessment
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           <nav className="step-nav app-nav" aria-label="App navigation">
