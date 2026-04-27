@@ -15,15 +15,15 @@ function LandingScreen() {
 
         <div className="landing-option-grid">
           <button
-            className="entry-card"
+            className="entry-card primary-entry-card"
             type="button"
             onClick={() => navigate('/flight-setup')}
           >
             <span className="eyebrow">Deterministic Flow</span>
             <strong>Start Full PAVE Assessment</strong>
             <span>
-              Enter flight details, review weather context, complete PAVE factors, and
-              receive the structured go / no-go recommendation.
+              Enter flight details, review weather, and complete PAVE factors
+              for a structured go/no-go recommendation.
             </span>
           </button>
 

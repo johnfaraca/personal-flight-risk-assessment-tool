@@ -63,7 +63,7 @@ function AppShell() {
           </div>
         </div>
         {showAssessmentNav ? (
-          <div className="wizard-nav" aria-label="Assessment session controls">
+          <section className="wizard-header-card" aria-label="Assessment navigation">
             <div className="wizard-heading-row">
               <h2 className="wizard-title">Full PAVE Assessment</h2>
               <div className="wizard-actions">
@@ -83,7 +83,19 @@ function AppShell() {
                 </button>
               </div>
             </div>
-          </div>
+
+            <nav className="step-nav wizard-steps" aria-label="Assessment steps">
+              {assessmentSteps.map((step) => (
+                <NavLink
+                  key={step.to}
+                  to={step.to}
+                  className={({ isActive }) => `step-pill${isActive ? ' active' : ''}`}
+                >
+                  {step.label}
+                </NavLink>
+              ))}
+            </nav>
+          </section>
         ) : (
           <nav className="step-nav app-nav-card" aria-label="App navigation">
             {appNavItems.map((item) => (
@@ -103,19 +115,6 @@ function AppShell() {
             ))}
           </nav>
         )}
-        {showAssessmentNav ? (
-          <nav className="step-nav assessment-step-nav" aria-label="Assessment steps">
-            {assessmentSteps.map((step) => (
-              <NavLink
-                key={step.to}
-                to={step.to}
-                className={({ isActive }) => `step-pill${isActive ? ' active' : ''}`}
-              >
-                {step.label}
-              </NavLink>
-            ))}
-          </nav>
-        ) : null}
       </header>
       <main className="main-content">
         <Outlet />
