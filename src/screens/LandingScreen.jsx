@@ -8,10 +8,9 @@ function LandingScreen() {
     <div className="screen-grid">
       <div className="card landing-intro-note">
         <p>
-          Start a structured preflight review using PAVE: Pilot, Aircraft,
-          enVironment, and External pressures. The app provides a
-          decision-support result and optional AI discussion to help you review
-          key risk factors.
+          Start a structured preflight review using <strong>PAVE</strong>: Pilot, Aircraft, enVironment, and External pressures.
+        <br />
+          The app provides a decision-support result with optional AI discussion of key risk factors.
         </p>
       </div>
 
