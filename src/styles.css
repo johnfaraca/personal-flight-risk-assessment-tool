@@ -491,6 +491,24 @@ h1 {
   color: var(--text-muted);
 }
 
+.landing-pave-card {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-strong);
+}
+
+.pave-note {
+  margin-bottom: 0;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.pave-note strong {
+  color: #102132;
+}
+
 .entry-card {
   display: grid;
   gap: 12px;
