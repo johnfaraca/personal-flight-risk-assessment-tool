@@ -549,84 +549,6 @@ h1 {
   font-size: 0.94rem;
 }
 
-.debug-panel {
-  margin-top: 18px;
-  padding: 16px;
-  border: 1px dashed rgba(23, 119, 200, 0.34);
-  border-radius: 16px;
-  background: #f4f8fc;
-  color: #24384d;
-}
-
-.debug-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin: 0 0 12px;
-}
-
-.debug-grid div {
-  min-width: 0;
-}
-
-.debug-grid dt {
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.debug-grid dd {
-  margin: 2px 0 0;
-  overflow-wrap: anywhere;
-}
-
-.debug-panel p {
-  margin-bottom: 0;
-}
-
-.mapping-debug {
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(16, 33, 50, 0.12);
-}
-
-.mapping-debug h3 {
-  margin-bottom: 10px;
-  font-size: 1rem;
-}
-
-.debug-reasons {
-  margin-top: 12px;
-}
-
-.debug-reasons ul {
-  margin: 6px 0 0;
-  padding-left: 18px;
-}
-
-.candidate-debug-list {
-  display: grid;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.candidate-debug-list details {
-  padding: 10px 12px;
-  border: 1px solid rgba(16, 33, 50, 0.12);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.7);
-}
-
-.candidate-debug-list summary {
-  cursor: pointer;
-  font-weight: 800;
-}
-
-.candidate-debug-list .debug-grid {
-  margin-top: 10px;
-}
-
 .advisory-altitude {
   color: #24384d;
   font-weight: 700;
@@ -1026,7 +948,6 @@ h1 {
   .two-column-grid,
   .three-column-grid,
   .weather-grid,
-  .debug-grid,
   .landing-option-grid,
   .form-grid,
   .stat-grid,
@@ -1099,7 +1020,6 @@ h1 {
   .two-column-grid,
   .three-column-grid,
   .weather-grid,
-  .debug-grid,
   .landing-option-grid,
   .form-grid,
   .stat-grid,

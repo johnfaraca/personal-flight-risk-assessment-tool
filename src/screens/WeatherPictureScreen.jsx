@@ -32,12 +32,7 @@ function WeatherPictureScreen() {
   const showEnrouteWorkload = Boolean(displayedHazards.interpretation);
   const advisoryItems = weatherPicture.advisories?.items ?? [];
   const hasRouteRelevantAdvisoryItems = advisoryItems.length > 0;
-  const advisoryDebug = buildAdvisoryDebugSummary({
-    weatherPicture,
-    weatherStatus,
-    weatherError,
-    advisoryItems
-  });
+  const advisoryStatusMessage = getAdvisoryStatusMessage({ weatherPicture, advisoryItems });
 
   return (
     <div className="screen-grid">
@@ -175,215 +170,37 @@ function WeatherPictureScreen() {
         {weatherPicture.advisories?.note ? (
           <div className="notice">{weatherPicture.advisories.note}</div>
         ) : null}
+        <div className="notice">{advisoryStatusMessage}</div>
         {hasRouteRelevantAdvisoryItems ? (
           <div className="hazard-list">
             {advisoryItems.map((item) => (
               <AdvisoryItem key={item.id} item={item} />
             ))}
           </div>
-        ) : (
-          <p>No route-relevant advisories or notices are currently mapped for this flight.</p>
-        )}
-        <AdvisoryDebugPanel debug={advisoryDebug} />
+        ) : null}
         <div className="official-weather-guidance">{OFFICIAL_WEATHER_GUIDANCE}</div>
       </SectionCard>
     </div>
   );
 }
 
-function AdvisoryDebugPanel({ debug }) {
-  return (
-    <div className="debug-panel">
-      <span className="eyebrow">Temporary advisory debug</span>
-      <dl className="debug-grid">
-        <div>
-          <dt>Fetch status</dt>
-          <dd>{debug.fetchedSuccessfully ? 'Fetched successfully' : 'Not fetched / unavailable'}</dd>
-        </div>
-        <div>
-          <dt>Data mode</dt>
-          <dd>{debug.dataMode}</dd>
-        </div>
-        <div>
-          <dt>Source used</dt>
-          <dd>{debug.sourceUsed}</dd>
-        </div>
-        <div>
-          <dt>Raw advisories returned</dt>
-          <dd>{debug.rawAdvisoryCount}</dd>
-        </div>
-        <div>
-          <dt>Mapped route-relevant advisories</dt>
-          <dd>{debug.mappedRouteRelevantCount}</dd>
-        </div>
-        <div>
-          <dt>Fetch/API error</dt>
-          <dd>{debug.fetchErrorMessage || 'None reported'}</dd>
-        </div>
-        <div>
-          <dt>AWC / NOTAM sources</dt>
-          <dd>
-            G-AIRMET {debug.rawCounts.gairmet}, SIGMET/AIRMET {debug.rawCounts.airsigmet},
-            NOTAM {debug.rawCounts.notams}
-          </dd>
-        </div>
-        <div>
-          <dt>Proxy configuration</dt>
-          <dd>{debug.proxyConfiguration}</dd>
-        </div>
-      </dl>
-      <p>
-        Production check: the browser requests <code>/api/weather-picture</code> on the current
-        origin unless <code>VITE_WEATHER_PROXY_ORIGIN</code> is set. The FAA AWC and NOTAM base
-        URLs are server-side constants, not Vite variables. A missing deployed API route, missing
-        proxy origin, or CORS/network failure can prevent live advisories from loading.
-      </p>
-      {debug.mappingDiagnostics ? (
-        <div className="mapping-debug">
-          <h3>Mapping diagnostics</h3>
-          <dl className="debug-grid">
-            <div>
-              <dt>Flight inputs</dt>
-              <dd>
-                {debug.mappingDiagnostics.flightInputs.departureIcao} to{' '}
-                {debug.mappingDiagnostics.flightInputs.destinationIcao},{' '}
-                {debug.mappingDiagnostics.flightInputs.cruiseAltitude} ft
-              </dd>
-            </div>
-            <div>
-              <dt>Times</dt>
-              <dd>
-                Depart {debug.mappingDiagnostics.flightInputs.plannedDepartureTime || 'unknown'}; ETA{' '}
-                {debug.mappingDiagnostics.flightInputs.estimatedArrivalTime || 'unknown'}
-              </dd>
-            </div>
-            <div>
-              <dt>Departure lat/lon</dt>
-              <dd>{debug.mappingDiagnostics.flightInputs.departureLatLon}</dd>
-            </div>
-            <div>
-              <dt>Destination lat/lon</dt>
-              <dd>{debug.mappingDiagnostics.flightInputs.destinationLatLon}</dd>
-            </div>
-            <div>
-              <dt>Raw advisory summary</dt>
-              <dd>
-                ZULU {debug.mappingDiagnostics.rawSummary.zulu}, TANGO{' '}
-                {debug.mappingDiagnostics.rawSummary.tango}, SIERRA{' '}
-                {debug.mappingDiagnostics.rawSummary.sierra}, SIGMET/AIRMET{' '}
-                {debug.mappingDiagnostics.rawSummary.sigmetAirmet}, NOTAM{' '}
-                {debug.mappingDiagnostics.rawSummary.notams}
-              </dd>
-            </div>
-            <div>
-              <dt>Mapping result</dt>
-              <dd>
-                Raw {debug.rawAdvisoryCount}; candidates before final filtering{' '}
-                {debug.mappingDiagnostics.candidateRouteRelevantCount}; final mapped{' '}
-                {debug.mappingDiagnostics.finalMappedCount}
-              </dd>
-            </div>
-          </dl>
-          <div className="debug-reasons">
-            <strong>Exclusion reasons</strong>
-            {Object.entries(debug.mappingDiagnostics.exclusionReasons).length ? (
-              <ul>
-                {Object.entries(debug.mappingDiagnostics.exclusionReasons).map(([reason, count]) => (
-                  <li key={reason}>
-                    {count}: {reason}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>None reported.</p>
-            )}
-          </div>
-          <div className="candidate-debug-list">
-            {debug.mappingDiagnostics.candidates.map((candidate) => (
-              <details key={candidate.id}>
-                <summary>
-                  {candidate.productType} / {candidate.hazardType}: {candidate.finalFilterReason}
-                </summary>
-                <dl className="debug-grid">
-                  <div>
-                    <dt>Valid window</dt>
-                    <dd>{candidate.validWindow}</dd>
-                  </div>
-                  <div>
-                    <dt>Altitude fields</dt>
-                    <dd>{formatDebugObject(candidate.altitudeFields)}</dd>
-                  </div>
-                  <div>
-                    <dt>Route overlap</dt>
-                    <dd>{candidate.intersectsOrNearRoute ? 'yes' : 'no'}</dd>
-                  </div>
-                  <div>
-                    <dt>Distance from route</dt>
-                    <dd>
-                      {candidate.distanceFromRouteNm === null
-                        ? 'not calculated'
-                        : `${candidate.distanceFromRouteNm} NM`}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Time overlap</dt>
-                    <dd>{candidate.timeOverlap ? 'yes' : 'no'}</dd>
-                  </div>
-                  <div>
-                    <dt>Altitude overlap</dt>
-                    <dd>{candidate.altitudeOverlap ? 'yes' : 'no'}</dd>
-                  </div>
-                </dl>
-              </details>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function buildAdvisoryDebugSummary({ weatherPicture, weatherStatus, weatherError, advisoryItems }) {
+function getAdvisoryStatusMessage({ weatherPicture, advisoryItems }) {
   const debug = weatherPicture.advisories?.debug ?? {};
-  const clientDebug = debug.client ?? weatherError?.details?.client ?? weatherError?.details ?? {};
-  const rawCounts = debug.rawCounts ?? {
-    gairmet: 0,
-    airsigmet: 0,
-    notams: 0,
-    total: 0
-  };
-  const viteProxyOrigin =
-    typeof import.meta !== 'undefined' && import.meta.env
-      ? import.meta.env.VITE_WEATHER_PROXY_ORIGIN || ''
-      : '';
-  const browserOrigin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
-  const selectedProxyOrigin = clientDebug.selectedProxyOrigin ?? (viteProxyOrigin || browserOrigin);
+  const rawAdvisoryCount = debug.rawAdvisoryCount ?? debug.rawCounts?.total ?? 0;
 
-  return {
-    fetchedSuccessfully:
-      debug.fetchedSuccessfully ?? (weatherPicture.apiHook?.status === 'live' && !weatherError),
-    dataMode: debug.dataMode ?? weatherPicture.apiHook?.status ?? weatherStatus ?? 'unknown',
-    sourceUsed: debug.sourceUsed ?? weatherPicture.weatherDataUsed?.sourceLabel ?? 'Unknown',
-    fetchErrorMessage:
-      debug.fetchErrorMessage ?? weatherError?.message ?? weatherError?.details?.message ?? '',
-    rawAdvisoryCount: debug.rawAdvisoryCount ?? rawCounts.total ?? 0,
-    rawCounts,
-    mappedRouteRelevantCount: debug.mappedRouteRelevantCount ?? advisoryItems.length,
-    mappingDiagnostics: debug.mappingDiagnostics ?? null,
-    proxyConfiguration: `VITE_WEATHER_PROXY_ORIGIN ${
-      viteProxyOrigin || 'not set'
-    }; browser origin ${browserOrigin}; selected proxy origin ${selectedProxyOrigin}`
-  };
-}
-
-function formatDebugObject(value) {
-  const entries = Object.entries(value ?? {});
-
-  if (entries.length === 0) {
-    return 'none';
+  if (advisoryItems.length > 0) {
+    return `${advisoryItems.length} route-relevant advisories or notices are mapped for this flight.`;
   }
 
-  return entries.map(([key, entry]) => `${key}: ${entry}`).join(', ');
+  if (weatherPicture.apiHook?.status !== 'live' || debug.fetchedSuccessfully === false) {
+    return 'Live advisories and notices were not fetched for this weather picture.';
+  }
+
+  if (rawAdvisoryCount > 0) {
+    return `${rawAdvisoryCount} regional advisories or notices were returned, but none are currently route-relevant for this flight.`;
+  }
+
+  return 'No live advisories or notices were returned for this flight.';
 }
 
 function StationSummary({ station, airportCode, airportName }) {

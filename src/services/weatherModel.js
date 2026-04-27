@@ -350,8 +350,7 @@ function buildAdvisoryDebug({
   sourceUsed,
   fetchErrorMessage,
   rawCounts,
-  mappedCount,
-  mappingDiagnostics = null
+  mappedCount
 }) {
   return {
     apiStatus,
@@ -366,256 +365,8 @@ function buildAdvisoryDebug({
       notams: 0,
       total: 0
     },
-    mappedRouteRelevantCount: mappedCount ?? 0,
-    mappingDiagnostics
+    mappedRouteRelevantCount: mappedCount ?? 0
   };
-}
-
-function buildAdvisoryMappingDiagnostics({ awcData, flightSetup, flightPlan, finalMappedCount }) {
-  const rawGairmets = awcData.advisories?.gairmet ?? [];
-  const rawAirSigmets = awcData.advisories?.airsigmet ?? [];
-  const rawNotams = awcData.advisories?.notams?.items ?? [];
-  const candidateDiagnostics = [
-    ...rawGairmets.map((item, index) => buildGairmetDiagnostic({
-      item,
-      index,
-      flightSetup,
-      flightPlan
-    })),
-    ...rawAirSigmets.map((item, index) => buildAirSigmetDiagnostic({
-      item,
-      index,
-      flightSetup,
-      flightPlan
-    })),
-    ...rawNotams.map((item, index) => buildNotamDiagnostic({
-      item,
-      index,
-      flightSetup,
-      flightPlan
-    }))
-  ];
-
-  return {
-    flightInputs: {
-      departureIcao: flightPlan.departureAirport,
-      destinationIcao: flightPlan.destinationAirport,
-      cruiseAltitude: Number(flightSetup.cruiseAltitude) || 0,
-      plannedDepartureTime: flightSetup.plannedDepartureTime,
-      estimatedArrivalTime: flightPlan.estimatedArrivalTime,
-      routeDistanceNm: flightPlan.routeDistanceNm ?? null,
-      departureLatLon: formatDebugLatLon(flightPlan.departure),
-      destinationLatLon: formatDebugLatLon(flightPlan.destination)
-    },
-    rawSummary: {
-      zulu: rawGairmets.filter((item) => advisoryTypeText(item).includes('ZULU')).length,
-      tango: rawGairmets.filter((item) => advisoryTypeText(item).includes('TANGO')).length,
-      sierra: rawGairmets.filter((item) => advisoryTypeText(item).includes('SIERRA')).length,
-      sigmetAirmet: rawAirSigmets.length,
-      notams: rawNotams.length
-    },
-    candidateRouteRelevantCount: candidateDiagnostics.filter((item) => item.routeRelevantBeforeFinalFiltering).length,
-    finalMappedCount,
-    exclusionReasons: countBy(
-      candidateDiagnostics
-        .map((item) => item.finalFilterReason)
-        .filter((reason) => reason.startsWith('excluded:'))
-    ),
-    candidates: candidateDiagnostics.slice(0, 15)
-  };
-}
-
-function buildGairmetDiagnostic({ item, index, flightSetup, flightPlan }) {
-  const altitudeInfo = buildGairmetAltitudeInfo(item);
-  return buildPolygonDiagnostic({
-    id: `gairmet-${index}`,
-    productType: item.product ?? 'G-AIRMET',
-    hazardType: item.hazard ?? item.product ?? 'unknown',
-    rawText: [item.product, item.hazard, item.due_to].filter(Boolean).join(' | '),
-    startTime: item.validTime ?? fromUnixSeconds(item.issueTime),
-    endTime: fromUnixSeconds(item.expireTime),
-    altitudeFields: {
-      base: item.base ?? null,
-      top: item.top ?? null,
-      fzlbase: item.fzlbase ?? null,
-      fzltop: item.fzltop ?? null,
-      level: item.level ?? null
-    },
-    altitudeMinFt: altitudeInfo.overlapMinFt,
-    altitudeMaxFt: altitudeInfo.overlapMaxFt,
-    coords: normalizeCoords(item.coords),
-    flightSetup,
-    flightPlan
-  });
-}
-
-function buildAirSigmetDiagnostic({ item, index, flightSetup, flightPlan }) {
-  const altitudeInfo = buildAirSigmetAltitudeInfo(item);
-  return buildPolygonDiagnostic({
-    id: `airsigmet-${index}`,
-    productType: item.airSigmetType ?? 'SIGMET/AIRMET',
-    hazardType: item.hazard ?? item.airSigmetType ?? 'unknown',
-    rawText: item.rawAirSigmet ?? '',
-    startTime: fromUnixSeconds(item.validTimeFrom) ?? item.creationTime,
-    endTime: fromUnixSeconds(item.validTimeTo),
-    altitudeFields: {
-      altitudeLow1: item.altitudeLow1 ?? null,
-      altitudeLow2: item.altitudeLow2 ?? null,
-      altitudeLow: item.altitudeLow ?? null,
-      altitudeLo: item.altitudeLo ?? null,
-      altitudeHi1: item.altitudeHi1 ?? null,
-      altitudeHi2: item.altitudeHi2 ?? null,
-      altitudeHi: item.altitudeHi ?? null,
-      altitudeHigh: item.altitudeHigh ?? null
-    },
-    altitudeMinFt: altitudeInfo.overlapMinFt,
-    altitudeMaxFt: altitudeInfo.overlapMaxFt,
-    coords: normalizeCoords(item.coords),
-    flightSetup,
-    flightPlan
-  });
-}
-
-function buildPolygonDiagnostic({
-  id,
-  productType,
-  hazardType,
-  rawText,
-  startTime,
-  endTime,
-  altitudeFields,
-  altitudeMinFt,
-  altitudeMaxFt,
-  coords,
-  flightSetup,
-  flightPlan
-}) {
-  const routeSegment = buildRouteSegment(flightPlan);
-  const flightWindow = buildFlightWindow(flightSetup, flightPlan);
-  const routeOverlap = polygonOverlapsRoute(coords, routeSegment, 20);
-  const timeOverlap = advisoryOverlapsTimeWindow(startTime, endTime, flightWindow);
-  const altitudeOverlap = advisoryOverlapsAltitude(
-    altitudeMinFt,
-    altitudeMaxFt,
-    Number(flightSetup.cruiseAltitude) || 0
-  );
-  const distanceFromRouteNm = minimumDistanceToRouteNm(coords, routeSegment);
-
-  return {
-    id,
-    productType,
-    hazardType,
-    validWindow: formatDebugWindow(startTime, endTime),
-    altitudeFields: compactDebugObject(altitudeFields),
-    intersectsOrNearRoute: routeOverlap,
-    distanceFromRouteNm,
-    timeOverlap,
-    altitudeOverlap,
-    routeRelevantBeforeFinalFiltering: routeOverlap && timeOverlap,
-    finalFilterReason: getPolygonFilterReason({
-      routeOverlap,
-      timeOverlap,
-      altitudeOverlap,
-      coords,
-      routeSegment,
-      flightWindow
-    }),
-    rawText
-  };
-}
-
-function buildNotamDiagnostic({ item, index, flightSetup, flightPlan }) {
-  const mapping = deriveNotamMapping(item.rawText ?? '');
-  const flightWindow = buildFlightWindow(flightSetup, flightPlan);
-  const routeOverlap = item.airportCode === flightPlan.destinationAirport;
-  const timeOverlap = advisoryOverlapsTimeWindow(item.startTime, item.endTime, flightWindow);
-
-  return {
-    id: item.id ?? `notam-${index}`,
-    productType: 'NOTAM',
-    hazardType: mapping?.title ?? 'unmapped NOTAM',
-    validWindow: formatDebugWindow(item.startTime, item.endTime),
-    altitudeFields: {},
-    intersectsOrNearRoute: routeOverlap,
-    distanceFromRouteNm: null,
-    timeOverlap,
-    altitudeOverlap: true,
-    routeRelevantBeforeFinalFiltering: routeOverlap && timeOverlap,
-    finalFilterReason: getNotamFilterReason({ mapping, routeOverlap, timeOverlap, flightWindow }),
-    rawText: item.rawText ?? ''
-  };
-}
-
-function getPolygonFilterReason({ routeOverlap, timeOverlap, altitudeOverlap, coords, routeSegment, flightWindow }) {
-  if (!routeSegment) {
-    return 'excluded: missing departure/destination coordinates';
-  }
-
-  if (!Array.isArray(coords) || coords.length < 3) {
-    return 'excluded: missing or invalid advisory polygon';
-  }
-
-  if (!flightWindow.isValid) {
-    return 'excluded: invalid flight time window';
-  }
-
-  if (!routeOverlap) {
-    return 'excluded: polygon does not intersect route corridor';
-  }
-
-  if (!timeOverlap) {
-    return 'excluded: advisory valid time does not overlap flight window';
-  }
-
-  if (!altitudeOverlap) {
-    return 'excluded: advisory altitude does not include planned cruise altitude';
-  }
-
-  return 'included: route, time, and altitude overlap';
-}
-
-function getNotamFilterReason({ mapping, routeOverlap, timeOverlap, flightWindow }) {
-  if (!mapping) {
-    return 'excluded: NOTAM text has no current factor mapping';
-  }
-
-  if (!flightWindow.isValid) {
-    return 'excluded: invalid flight time window';
-  }
-
-  if (!routeOverlap) {
-    return 'excluded: NOTAM airport is not destination';
-  }
-
-  if (!timeOverlap) {
-    return 'excluded: NOTAM time does not overlap flight window';
-  }
-
-  return 'included: destination NOTAM overlaps flight window';
-}
-
-function advisoryTypeText(item) {
-  return `${item.product ?? ''} ${item.hazard ?? ''} ${item.airSigmetType ?? ''}`.toUpperCase();
-}
-
-function formatDebugLatLon(airport) {
-  const point = toRoutePoint(airport);
-  return point ? `${point.lat.toFixed(4)}, ${point.lon.toFixed(4)}` : 'unavailable';
-}
-
-function formatDebugWindow(startTime, endTime) {
-  return `${startTime ?? 'unknown'} to ${endTime ?? 'open-ended'}`;
-}
-
-function compactDebugObject(value) {
-  return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== null && entry !== undefined && entry !== ''));
-}
-
-function countBy(values) {
-  return values.reduce((counts, value) => ({
-    ...counts,
-    [value]: (counts[value] ?? 0) + 1
-  }), {});
 }
 
 function buildDisplayedGeneratedHazards() {
@@ -1074,13 +825,6 @@ function buildLiveAdvisoryAnalysis({ awcData, flightSetup, flightPlan }) {
       (awcData.advisories?.airsigmet?.length ?? 0) +
       (awcData.advisories?.notams?.items?.length ?? 0)
   };
-  const mappingDiagnostics = buildAdvisoryMappingDiagnostics({
-    awcData,
-    flightSetup,
-    flightPlan,
-    finalMappedCount: advisoryItems.length
-  });
-
   return {
     scoreableFactorIds: [...scoreableFactorIds],
     suppressedFactorIds: [...suppressedFactorIds],
@@ -1091,8 +835,7 @@ function buildLiveAdvisoryAnalysis({ awcData, flightSetup, flightPlan }) {
       sourceUsed: 'FAA AWC API via app weather proxy',
       fetchErrorMessage: awcData.advisories?.notams?.details?.cause ?? null,
       rawCounts,
-      mappedCount: advisoryItems.length,
-      mappingDiagnostics
+      mappedCount: advisoryItems.length
     }),
     display: {
       sources: {
@@ -1756,22 +1499,6 @@ function distancePointToRouteNm(point, routeSegment) {
   const projectedPoint = projectToNm(point, referenceLat);
 
   return distancePointToSegment(projectedPoint, projectedDeparture, projectedDestination);
-}
-
-function minimumDistanceToRouteNm(points, routeSegment) {
-  if (!routeSegment || !Array.isArray(points) || points.length === 0) {
-    return null;
-  }
-
-  const distances = points
-    .map((point) => distancePointToRouteNm(point, routeSegment))
-    .filter((distance) => Number.isFinite(distance));
-
-  if (distances.length === 0) {
-    return null;
-  }
-
-  return Number(Math.min(...distances).toFixed(1));
 }
 
 function projectToNm(point, referenceLat) {
