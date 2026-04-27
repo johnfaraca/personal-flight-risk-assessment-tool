@@ -57,7 +57,7 @@ function AppShell() {
               <h1 className="app-title">Personal Flight Risk Assessment Tool</h1>
               <p className="brand-label">Team Eagle_AI</p>
               <p className="hero-support-line">
-                Pilot go/no-go decision support for preflight review.
+                Pilot go/no-go decision support.
               </p>
             </div>
           </div>
