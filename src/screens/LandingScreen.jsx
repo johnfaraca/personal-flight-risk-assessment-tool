@@ -7,9 +7,9 @@ function LandingScreen() {
     <div className="screen-grid">
       <div className="card landing-start-card">
         <div className="landing-start-header">
-          <h2>Choose Your Starting Point</h2>
+          <h2>Choose a Path</h2>
           <p>
-            Start a structured preflight review using <strong>PAVE</strong> or ask a general safety question.
+            Start with a structured <strong>PAVE</strong> review or ask a general safety question.
           </p>
         </div>
 
