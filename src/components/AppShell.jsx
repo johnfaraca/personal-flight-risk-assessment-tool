@@ -9,7 +9,7 @@ import {
 
 const appNavItems = [
   { to: '/', label: 'Home' },
-  { to: '/flight-setup', label: 'Start Assessment' },
+  { to: '/flight-setup', label: 'Start Assessment', mobileLabel: 'Start PAVE' },
   { to: '/ai-chat', label: 'AI Safety Chat' },
   { to: '/about', label: 'About' }
 ];
@@ -110,7 +110,8 @@ function AppShell() {
                 }
                 className={({ isActive }) => `step-pill${isActive ? ' active' : ''}`}
               >
-                {item.label}
+                <span className="nav-label-full">{item.label}</span>
+                <span className="nav-label-mobile">{item.mobileLabel ?? item.label}</span>
               </NavLink>
             ))}
           </nav>
