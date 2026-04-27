@@ -1,18 +1,10 @@
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
-import teamEagleAiWordmark from '../assets/team_eagle_ai_wordmark_cropped.png';
 import SectionCard from '../components/SectionCard';
 
 function AboutScreen() {
   return (
     <div className="screen-grid">
-      <SectionCard
-        title="Personal Flight Risk Assessment Tool"
-      >
-        <img
-          className="about-wordmark"
-          src={teamEagleAiWordmark}
-          alt="Team Eagle_AI wordmark"
-        />
+      <SectionCard>
         <div className="factor-list">
           <div className="factor-row">
             <span>Project Identity</span>
@@ -35,27 +27,32 @@ function AboutScreen() {
             <strong>Deterministic scoring first, AI discussion second</strong>
           </div>
         </div>
-        <div className="about-icon-links">
-          <a
-            href="https://www.linkedin.com/in/john-faraca/"
-            aria-label="LinkedIn Profile"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <FaLinkedin />
-          </a>
-          <a
-            href="https://github.com/johnfaraca"
-            aria-label="GitHub Profile"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <FaGithub />
-          </a>
+        <div className="about-links-card">
+          <div>
+            <span>Professional Links</span>
+          </div>
+          <div className="about-icon-links">
+            <a
+              href="https://www.linkedin.com/in/john-faraca/"
+              aria-label="LinkedIn Profile"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <FaLinkedin />
+            </a>
+            <a
+              href="https://github.com/johnfaraca"
+              aria-label="GitHub Profile"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <FaGithub />
+            </a>
+          </div>
         </div>
       </SectionCard>
 
-      <SectionCard title="How it works">
+      <SectionCard title="How it works" className="about-section-card">
         <p>
           The tool guides users through flight setup, weather context, PAVE
           assessment, and results. It produces a deterministic recommendation based
@@ -64,7 +61,7 @@ function AboutScreen() {
         </p>
       </SectionCard>
 
-      <SectionCard title="About PAVE">
+      <SectionCard title="About PAVE" className="about-section-card">
         <p>
           PAVE is a pilot risk-management framework used to organize preflight
           decision-making into four areas: Pilot, Aircraft, enVironment, and
@@ -79,7 +76,7 @@ function AboutScreen() {
         </p>
       </SectionCard>
 
-      <SectionCard title="AI use">
+      <SectionCard title="AI Use" className="about-section-card">
         <p>
           Deterministic scoring is the primary decision-support mechanism. The AI
           Safety Chat is supplemental and is used to help discuss completed results,
@@ -88,7 +85,7 @@ function AboutScreen() {
         </p>
       </SectionCard>
 
-      <SectionCard title="Weather source note">
+      <SectionCard title="Weather source note" className="about-section-card">
         <p>
           Weather data is loaded from the FAA Aviation Weather Center. Some factors
           use deterministic fallback mapping. Users should verify weather
@@ -96,7 +93,7 @@ function AboutScreen() {
           1-800-WX-BRIEF before making a go/no-go decision.
         </p>
       </SectionCard>
-      <SectionCard title="Privacy, Terms, and Safety Notice">
+      <SectionCard title="Privacy, Terms, and Safety Notice" className="about-section-card">
         <p>
           This application is an educational MVP and decision-support prototype. It is not an FAA-approved flight planning tool, weather briefing service, or source of operational flight authorization. Pilots remain responsible for obtaining official weather briefings, checking NOTAMs, complying with applicable regulations, and making final go/no-go decisions.
         </p>
