@@ -85,7 +85,7 @@ function AppShell() {
             </div>
           </div>
         ) : (
-          <nav className="step-nav app-nav" aria-label="App navigation">
+          <nav className="step-nav app-nav-card" aria-label="App navigation">
             {appNavItems.map((item) => (
               <NavLink
                 key={item.to}
