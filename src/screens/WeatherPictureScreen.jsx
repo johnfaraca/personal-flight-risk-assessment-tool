@@ -238,6 +238,107 @@ function AdvisoryDebugPanel({ debug }) {
         URLs are server-side constants, not Vite variables. A missing deployed API route, missing
         proxy origin, or CORS/network failure can prevent live advisories from loading.
       </p>
+      {debug.mappingDiagnostics ? (
+        <div className="mapping-debug">
+          <h3>Mapping diagnostics</h3>
+          <dl className="debug-grid">
+            <div>
+              <dt>Flight inputs</dt>
+              <dd>
+                {debug.mappingDiagnostics.flightInputs.departureIcao} to{' '}
+                {debug.mappingDiagnostics.flightInputs.destinationIcao},{' '}
+                {debug.mappingDiagnostics.flightInputs.cruiseAltitude} ft
+              </dd>
+            </div>
+            <div>
+              <dt>Times</dt>
+              <dd>
+                Depart {debug.mappingDiagnostics.flightInputs.plannedDepartureTime || 'unknown'}; ETA{' '}
+                {debug.mappingDiagnostics.flightInputs.estimatedArrivalTime || 'unknown'}
+              </dd>
+            </div>
+            <div>
+              <dt>Departure lat/lon</dt>
+              <dd>{debug.mappingDiagnostics.flightInputs.departureLatLon}</dd>
+            </div>
+            <div>
+              <dt>Destination lat/lon</dt>
+              <dd>{debug.mappingDiagnostics.flightInputs.destinationLatLon}</dd>
+            </div>
+            <div>
+              <dt>Raw advisory summary</dt>
+              <dd>
+                ZULU {debug.mappingDiagnostics.rawSummary.zulu}, TANGO{' '}
+                {debug.mappingDiagnostics.rawSummary.tango}, SIERRA{' '}
+                {debug.mappingDiagnostics.rawSummary.sierra}, SIGMET/AIRMET{' '}
+                {debug.mappingDiagnostics.rawSummary.sigmetAirmet}, NOTAM{' '}
+                {debug.mappingDiagnostics.rawSummary.notams}
+              </dd>
+            </div>
+            <div>
+              <dt>Mapping result</dt>
+              <dd>
+                Raw {debug.rawAdvisoryCount}; candidates before final filtering{' '}
+                {debug.mappingDiagnostics.candidateRouteRelevantCount}; final mapped{' '}
+                {debug.mappingDiagnostics.finalMappedCount}
+              </dd>
+            </div>
+          </dl>
+          <div className="debug-reasons">
+            <strong>Exclusion reasons</strong>
+            {Object.entries(debug.mappingDiagnostics.exclusionReasons).length ? (
+              <ul>
+                {Object.entries(debug.mappingDiagnostics.exclusionReasons).map(([reason, count]) => (
+                  <li key={reason}>
+                    {count}: {reason}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>None reported.</p>
+            )}
+          </div>
+          <div className="candidate-debug-list">
+            {debug.mappingDiagnostics.candidates.map((candidate) => (
+              <details key={candidate.id}>
+                <summary>
+                  {candidate.productType} / {candidate.hazardType}: {candidate.finalFilterReason}
+                </summary>
+                <dl className="debug-grid">
+                  <div>
+                    <dt>Valid window</dt>
+                    <dd>{candidate.validWindow}</dd>
+                  </div>
+                  <div>
+                    <dt>Altitude fields</dt>
+                    <dd>{formatDebugObject(candidate.altitudeFields)}</dd>
+                  </div>
+                  <div>
+                    <dt>Route overlap</dt>
+                    <dd>{candidate.intersectsOrNearRoute ? 'yes' : 'no'}</dd>
+                  </div>
+                  <div>
+                    <dt>Distance from route</dt>
+                    <dd>
+                      {candidate.distanceFromRouteNm === null
+                        ? 'not calculated'
+                        : `${candidate.distanceFromRouteNm} NM`}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Time overlap</dt>
+                    <dd>{candidate.timeOverlap ? 'yes' : 'no'}</dd>
+                  </div>
+                  <div>
+                    <dt>Altitude overlap</dt>
+                    <dd>{candidate.altitudeOverlap ? 'yes' : 'no'}</dd>
+                  </div>
+                </dl>
+              </details>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -268,10 +369,21 @@ function buildAdvisoryDebugSummary({ weatherPicture, weatherStatus, weatherError
     rawAdvisoryCount: debug.rawAdvisoryCount ?? rawCounts.total ?? 0,
     rawCounts,
     mappedRouteRelevantCount: debug.mappedRouteRelevantCount ?? advisoryItems.length,
+    mappingDiagnostics: debug.mappingDiagnostics ?? null,
     proxyConfiguration: `VITE_WEATHER_PROXY_ORIGIN ${
       viteProxyOrigin || 'not set'
     }; browser origin ${browserOrigin}; selected proxy origin ${selectedProxyOrigin}`
   };
+}
+
+function formatDebugObject(value) {
+  const entries = Object.entries(value ?? {});
+
+  if (entries.length === 0) {
+    return 'none';
+  }
+
+  return entries.map(([key, entry]) => `${key}: ${entry}`).join(', ');
 }
 
 function StationSummary({ station, airportCode, airportName }) {
