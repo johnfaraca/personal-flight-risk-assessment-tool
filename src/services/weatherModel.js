@@ -846,7 +846,7 @@ function buildLiveAdvisoryAnalysis({ awcData, flightSetup, flightPlan }) {
       note:
         awcData.advisories?.notams?.status === 'unavailable'
           ? awcData.advisories?.notams?.note ??
-            'NOTAM data could not be parsed for this run, so NOTAM-based risk-factor mapping is unavailable.'
+            'NOTAM review is unavailable for this run. Verify current NOTAMs through official sources before flight.'
           : 'Relevant advisories and notices are summarized below.',
       officialWeatherGuidance:
         hasAdvisoryOnlyWeather || hasUnavailableNoticeData ? OFFICIAL_WEATHER_GUIDANCE : null,

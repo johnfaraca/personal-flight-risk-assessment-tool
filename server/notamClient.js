@@ -52,7 +52,7 @@ export async function fetchAirportNotams(airportCode) {
       status: 'unavailable',
       items: [],
       note:
-        'NOTAM data could not be parsed for this run, so NOTAM-based risk-factor mapping is unavailable.',
+        'NOTAM review is unavailable for this run. Verify current NOTAMs through official sources before flight.',
       details: { url: url.toString() }
     };
   }
