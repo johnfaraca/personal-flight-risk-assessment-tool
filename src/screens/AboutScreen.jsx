@@ -4,7 +4,7 @@ import SectionCard from '../components/SectionCard';
 function AboutScreen() {
   return (
     <div className="screen-grid">
-      <SectionCard>
+      <SectionCard className="about-identity-card">
         <div className="factor-list">
           <div className="factor-row">
             <span>Project Identity</span>

@@ -121,10 +121,11 @@ function AppShell() {
         <Outlet />
       </main>
       <footer className="app-footer">
-        <p>Team Eagle_AI · Developed by John Faraca · Embry-Riddle Aeronautical University · 2026</p>
         <p>
-          Decision-support only — not a substitute for official briefings, flight
-          planning, performance calculations, regulations, or pilot judgment.
+          Decision-support only — not a replacement for official briefings or pilot judgment.
+        </p>
+        <p>
+          Team Eagle_AI · Developed by John Faraca · Embry-Riddle Aeronautical University · 2026
         </p>
       </footer>
       {pendingExitPath ? (

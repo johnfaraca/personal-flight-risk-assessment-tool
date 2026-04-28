@@ -20,10 +20,9 @@ function LandingScreen() {
             onClick={() => navigate('/flight-setup')}
           >
             <span className="eyebrow">Deterministic Flow</span>
-            <strong>Start Full PAVE Assessment</strong>
+            <strong>Full PAVE Assessment</strong>
             <span>
-              Enter flight details, review weather, and complete PAVE factors
-              for a structured go/no-go recommendation.
+              Enter flight details, review weather, and complete PAVE factors for a structured go/no-go recommendation, then discuss results with AI.
             </span>
           </button>
 
@@ -35,8 +34,7 @@ function LandingScreen() {
             <span className="eyebrow">AI Safety Chat</span>
             <strong>Ask a Safety Question</strong>
             <span>
-              Talk with the embedded watsonx Orchestrate assistant without changing
-              the deterministic assessment results.
+              Discuss flight risk, weather concerns, PAVE factors, go/no-go decisions, and human factors in aviation safety before flight.            
             </span>
           </button>
         </div>
