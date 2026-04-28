@@ -320,6 +320,10 @@ h1 {
   margin-bottom: 0;
 }
 
+.estimated-timing-card .section-header p {
+  max-width: none;
+}
+
 .results-header-actions {
   display: grid;
   justify-items: end;

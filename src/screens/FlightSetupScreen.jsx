@@ -138,6 +138,7 @@ function FlightSetupScreen() {
       <SectionCard
         title="Estimated Timing"
         subtitle="Estimated from the current departure airport, destination airport, planned departure time, and cruise speed."
+        className="estimated-timing-card"
       >
         <StatGrid
           items={[
