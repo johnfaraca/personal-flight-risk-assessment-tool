@@ -91,6 +91,8 @@ The assistant can receive structured context such as:
 
 This helps keep the AI discussion grounded in the actual assessment instead of producing generic or wandering advice. The behavior and guideline controls in watsonx Orchestrate helped shape the assistant around the project’s safety-focused workflow.
 
+For additional detail, see [AI Assistant Guidelines](docs/ai-assistant-guidelines.md).
+
 ## Weather and Advisory Note
 
 The app uses FAA Aviation Weather Center data where available, including server-side requests for aviation weather products. Some advisories may be shown as advisory-only when they do not cleanly map to scored risk factors. NOTAM parsing may be unavailable depending on the data returned by FAA NOTAM Search.
