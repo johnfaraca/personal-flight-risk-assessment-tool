@@ -12,7 +12,7 @@ The AI chat is supplemental. It does not calculate, override, authorize, or repl
 ## Live Demo
 
 **Prototype:** https://pave.johnfaraca.com  
-**Demo Video:** https://youtu.be/SAOF7Vg5XpU  
+**Demo Video:** https://youtu.be/0g5CJMw_kIc  
 **GitHub:** https://github.com/johnfaraca/personal-flight-risk-assessment-tool
 
 ## Problem Addressed
