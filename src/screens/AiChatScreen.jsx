@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import OrchestrateChatEmbed from '../components/OrchestrateChatEmbed';
+import OpenAIChat from '../components/OpenAIChat';
 import SectionCard from '../components/SectionCard';
 import { useAppContext } from '../state/AppContext';
 import {
@@ -123,7 +123,7 @@ function AiChatScreen() {
       </SectionCard>
 
       <SectionCard title="Embedded Chat">
-        <OrchestrateChatEmbed mode={mode} resultContext={assessmentContext} />
+        <OpenAIChat mode={mode} resultContext={assessmentContext} />
       </SectionCard>
     </div>
   );

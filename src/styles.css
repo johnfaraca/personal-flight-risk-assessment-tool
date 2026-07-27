@@ -33,7 +33,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -695,17 +696,123 @@ h1 {
   padding: 10px 14px;
 }
 
-.orchestrate-embed-shell {
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.openai-chat-shell {
   display: grid;
   gap: 14px;
 }
 
-.orchestrate-chat-root {
-  min-height: 620px;
-  overflow: hidden;
+.openai-chat-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.openai-chat-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--success);
+  box-shadow: 0 0 0 4px rgba(31, 122, 77, 0.12);
+}
+
+.openai-chat-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 420px;
+  max-height: 620px;
+  overflow-y: auto;
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--surface-strong);
+}
+
+.chat-message {
+  max-width: min(82%, 760px);
+  padding: 12px 14px;
+  border: 1px solid rgba(16, 33, 50, 0.12);
+  border-radius: 14px;
+  background: #f6f8fb;
+}
+
+.chat-message span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.chat-message p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.chat-message.user {
+  align-self: flex-end;
+  color: white;
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.chat-message.user span {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.chat-message.assistant {
+  align-self: flex-start;
+}
+
+.chat-message.loading p::after {
+  content: '...';
+}
+
+.openai-chat-form {
+  display: grid;
+  gap: 10px;
+}
+
+.openai-chat-form textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-strong);
+  color: inherit;
+}
+
+.openai-chat-form textarea:focus {
+  outline: 3px solid rgba(23, 119, 200, 0.18);
+  border-color: rgba(23, 119, 200, 0.55);
+}
+
+.openai-chat-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 .hazard-list,

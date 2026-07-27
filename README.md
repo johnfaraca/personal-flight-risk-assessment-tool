@@ -28,7 +28,7 @@ The Personal Flight Risk Assessment Tool addresses this by guiding the user thro
 3. **Weather Picture** — summarizes weather, airport, route, and advisory context.
 4. **PAVE Assessment** — presents structured risk questions and pre-filled weather or airport factors where available.
 5. **Results** — displays the deterministic recommendation, score details, flight rules applied, top risk drivers, and mitigation prompts.
-6. **Discuss This Result with AI** — opens an IBM watsonx Orchestrate chat with assessment context for supplemental discussion.
+6. **Discuss This Result with AI** — opens an OpenAI-powered chat with assessment context for supplemental discussion.
 7. **General AI Safety Chat** — provides a separate aviation safety discussion mode without requiring a completed assessment.
 
 ## What Is PAVE?
@@ -77,9 +77,9 @@ Structured assessment
 → Grounded AI discussion
 ```
 
-## IBM watsonx Orchestrate Integration
+## OpenAI Chat Integration
 
-IBM watsonx Orchestrate powers the embedded AI discussion layer. After the app generates a deterministic result, the assessment context is passed into the chat experience so the user can ask focused follow-up questions.
+The OpenAI Responses API powers the AI discussion layer through a server-side endpoint. After the app generates a deterministic result, the assessment context is passed into the chat experience so the user can ask focused follow-up questions.
 
 The assistant can receive structured context such as:
 
@@ -89,7 +89,7 @@ The assistant can receive structured context such as:
 - Flight rules applied
 - Top contributing factors
 
-This helps keep the AI discussion grounded in the actual assessment instead of producing generic or wandering advice. The behavior and guideline controls in watsonx Orchestrate helped shape the assistant around the project’s safety-focused workflow.
+This helps keep the AI discussion grounded in the actual assessment instead of producing generic or wandering advice. The assistant guidelines shape the chat around the project’s safety-focused workflow.
 
 For additional detail, see [AI Assistant Guidelines](docs/ai-assistant-guidelines.md).
 
@@ -103,7 +103,7 @@ Users must verify official weather, NOTAMs, and flight conditions separately thr
 
 This prototype does not include user accounts, payment processing, or intentional collection or storage of personally identifiable information. Browser session storage may temporarily hold current assessment data so the result-specific AI discussion can receive the active assessment context during the session.
 
-Embedded AI chat may process user messages and assessment context through IBM watsonx Orchestrate. Users should not enter sensitive personal, credential, medical, or private aircraft ownership information.
+AI chat may process user messages and assessment context through the server-side OpenAI integration. Users should not enter sensitive personal, credential, medical, or private aircraft ownership information.
 
 ## Tech Stack
 
@@ -112,10 +112,10 @@ Embedded AI chat may process user messages and assessment context through IBM wa
 - React Router
 - React Icons
 - Node.js HTTP server for local app serving and API routes
-- Server API routes for airport lookup, weather picture generation, and AI explanation availability
+- Server API routes for airport lookup, weather picture generation, and OpenAI chat
 - FAA Aviation Weather Center data integration for METAR, TAF, station, airport, G-AIRMET, and SIGMET/AIRMET data
 - FAA NOTAM Search integration with best-effort parsing
-- IBM watsonx Orchestrate embedded chat
+- Server-side OpenAI Responses API chat
 - Browser session storage for temporary assessment discussion context
 - OpenAI Codex for AI-assisted development support
 
@@ -123,7 +123,7 @@ Embedded AI chat may process user messages and assessment context through IBM wa
 
 OpenAI Codex was used as an AI-assisted development tool during implementation. It supported React component updates, routing changes, scoring logic refinement, UI copy improvements, responsive design fixes, and troubleshooting.
 
-Codex was used during development; IBM watsonx Orchestrate powers the user-facing embedded AI discussion experience.
+Codex was used during development; the OpenAI Responses API powers the user-facing AI discussion experience.
 
 ## Project Flow
 

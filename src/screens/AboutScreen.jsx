@@ -101,7 +101,7 @@ function AboutScreen() {
           The app does not intentionally collect or store personally identifiable information. Assessment inputs and results are used only to support the current session and may be stored temporarily in the browser through session storage. This prototype does not include user accounts, payment processing, database storage, or long-term server-side profile storage.
         </p>
         <p>
-          The embedded AI chat may process user messages and assessment context through IBM watsonx Orchestrate. Users should avoid entering personal, sensitive, credential, medical, or private aircraft ownership information.
+          The AI chat may process user messages and assessment context through the server-side OpenAI integration. Users should avoid entering personal, sensitive, credential, medical, or private aircraft ownership information.
         </p>
         <p>
           By using this prototype, users acknowledge that outputs are informational only and should be verified with official aviation sources, including AviationWeather.gov, 1800wxbrief.com, FAA Flight Service, flight instructors, dispatchers, or other qualified aviation professionals as appropriate.

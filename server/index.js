@@ -1,9 +1,11 @@
+import 'dotenv/config';
 import { createReadStream, existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lookupAirports } from './airportService.js';
+import { createAiChatResponse } from './openaiChatService.js';
 import { buildWeatherPictureFromFlightSetup } from './weatherService.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -67,6 +69,58 @@ const server = createServer(async (request, response) => {
             code: error.code || 'bad_proxy_response',
             message: `FAA AWC live weather is unavailable. ${error.message}`,
             details: error.details || null
+          })
+        );
+      }
+      return;
+    }
+
+    if (requestUrl.pathname === '/api/ai-chat') {
+      if (request.method !== 'POST') {
+        response.writeHead(405, {
+          'Content-Type': 'application/json; charset=utf-8',
+          Allow: 'POST'
+        });
+        response.end(
+          JSON.stringify({
+            error: 'method_not_allowed',
+            message: 'AI Safety Chat accepts POST requests only.'
+          })
+        );
+        return;
+      }
+
+      try {
+        const requestBody = await readJsonBody(request);
+        const aiChatResponse = await createAiChatResponse(requestBody);
+
+        response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        response.end(
+          JSON.stringify({
+            message: aiChatResponse.message,
+            model: aiChatResponse.model
+          })
+        );
+      } catch (error) {
+        const statusCode = Number(error.statusCode) || 502;
+        const errorCode = error.code || 'ai_chat_unavailable';
+        const message =
+          statusCode >= 500
+            ? 'AI Safety Chat is unavailable right now. The deterministic PAVE recommendation remains available; verify weather and planning details through official aviation sources.'
+            : error.message;
+
+        if (statusCode >= 500) {
+          console.error('[ai-chat] request failed', {
+            code: errorCode,
+            statusCode
+          });
+        }
+
+        response.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+        response.end(
+          JSON.stringify({
+            error: errorCode,
+            message
           })
         );
       }
@@ -143,6 +197,40 @@ async function serveStaticAsset(pathname, response) {
   const indexHtml = await readFile(path.join(distRoot, 'index.html'));
   response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   response.end(indexHtml);
+}
+
+async function readJsonBody(request) {
+  const chunks = [];
+  let totalLength = 0;
+  const maxBodyBytes = 256 * 1024;
+
+  for await (const chunk of request) {
+    totalLength += chunk.length;
+
+    if (totalLength > maxBodyBytes) {
+      const error = new Error('Request body is too large.');
+      error.statusCode = 413;
+      error.code = 'request_body_too_large';
+      throw error;
+    }
+
+    chunks.push(chunk);
+  }
+
+  const rawBody = Buffer.concat(chunks).toString('utf-8');
+
+  if (!rawBody.trim()) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(rawBody);
+  } catch {
+    const error = new Error('Request body must be valid JSON.');
+    error.statusCode = 400;
+    error.code = 'invalid_json';
+    throw error;
+  }
 }
 
 function contentTypeForPath(filePath) {
