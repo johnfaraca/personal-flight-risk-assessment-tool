@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import OpenAIChat from '../components/OpenAIChat';
 import SectionCard from '../components/SectionCard';
 import { useAppContext } from '../state/AppContext';
@@ -44,12 +44,8 @@ function AiChatScreen() {
   return (
     <div className="screen-grid">
       <SectionCard
-        title={mode === 'result-discussion' ? 'Discuss This Result With AI' : 'AI Safety Chat'}
-        subtitle={
-          mode === 'result-discussion'
-            ? 'The scored recommendation remains the primary app result. Use this chat for follow-up discussion and mitigation ideas only.'
-            : 'General embedded AI safety chat for aviation decision-support conversation.'
-        }
+        title={mode === 'result-discussion' ? 'Assessment discussion' : 'General safety chat'}
+        className="ai-chat-card"
         actions={
           <button className="secondary-button" type="button" onClick={backToLanding}>
             Back to landing
@@ -59,20 +55,19 @@ function AiChatScreen() {
         {mode === 'result-discussion' ? (
           <div className="result-context-panel">
             <p className="eyebrow">Assessment Context Loaded</p>
-            <div className="score-banner">
-              <div>
-                <span>Recommendation</span>
-                <strong>{resultContext?.recommendation ?? 'Unavailable'}</strong>
-              </div>
-              <div>
-                <span>Total score</span>
-                <strong>{resultContext?.totalScore ?? 'Unavailable'}</strong>
-              </div>
-              <div>
-                <span>Flight mode</span>
-                <strong>{resultContext?.flightMode ?? 'Not provided'}</strong>
-              </div>
-            </div>
+            <p className="assessment-discussion-summary">
+              <span>
+                <strong>Recommendation: {resultContext?.recommendation ?? 'Unavailable'}</strong>
+              </span>
+              <span>
+                <span className="assessment-summary-separator" aria-hidden="true">·</span>
+                <strong>Total score: {resultContext?.totalScore ?? 'Unavailable'}</strong>
+              </span>
+              <span>
+                <span className="assessment-summary-separator" aria-hidden="true">·</span>
+                <strong>Flight mode: {resultContext?.flightMode ?? 'Not provided'}</strong>
+              </span>
+            </p>
 
             <div className="assessment-context-actions">
               <button
@@ -97,32 +92,9 @@ function AiChatScreen() {
                 topContributingFactors={topContributingFactors}
               />
             ) : null}
-
-            <div className="notice">
-              <p className="eyebrow">Important</p>
-              <p>
-                This chat can explain the completed assessment, but it does not
-                recalculate the score, approve the flight, or replace official
-                briefings, regulations, checklists, planning, or pilot
-                judgment. Verify weather with AviationWeather.gov or
-                1-800-WX-BRIEF before making a go/no-go decision.
-              </p>
-            </div>
           </div>
-        ) : (
-          <div className="integration-note">
-            General chat mode
-            <br />
-            No assessment result is currently loaded. Ask a general preflight
-            question, or{' '}
-            <Link to="/flight-setup">complete a full assessment</Link> to discuss
-            a specific result.
-          </div>
-        )}
+        ) : null}
 
-      </SectionCard>
-
-      <SectionCard title="Embedded Chat">
         <OpenAIChat mode={mode} resultContext={assessmentContext} />
       </SectionCard>
     </div>

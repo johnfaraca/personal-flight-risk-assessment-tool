@@ -98,7 +98,11 @@ const server = createServer(async (request, response) => {
         response.end(
           JSON.stringify({
             message: aiChatResponse.message,
-            model: aiChatResponse.model
+            items: aiChatResponse.items,
+            listType: aiChatResponse.listType,
+            footer: aiChatResponse.footer,
+            model: aiChatResponse.model,
+            followUps: aiChatResponse.followUps
           })
         );
       } catch (error) {
